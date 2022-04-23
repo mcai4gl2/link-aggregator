@@ -1,0 +1,10 @@
+name: link
+channels:
+    - conda-forge
+dependencies:
+    - awscli
+    - pytest
+    - pytest-cov
+    - black
+    - ipython
+    - mock

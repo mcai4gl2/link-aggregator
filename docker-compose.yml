@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  dev:
+    image: link-latest
+    command: tail -f /dev/null
+    volumes:
+      - ./:/work
+  localstack:
+    image: localstack/localstack
+    environment:
+      - SERVICES=s3
+      - AWS_DEFAULT_REGION=us-east-1
+    ports:
+      - "4566:4566"
+  mockserver:
+    image: mockserver/mockserver
+    ports:
+      - "1080:1080"

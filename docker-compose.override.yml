@@ -1,0 +1,4 @@
+version: "3.8"
+services:
+  dev:
+    user: 1000:1000

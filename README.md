@@ -13,13 +13,12 @@ More implementation details:
 #### Local Development Setup
 
 Development environment can be setup using docker with the following steps:
-- Build the docker image with `docker build . -t link-latest --target dev`
 - Start the dev environment with `docker-compose up -d`
 - SSH to dev image to develop with `docker-compose exec dev /bin/bash`. Code shall be mounted to `/work`
 
 Before development, updating `docker-compose.override.yml` to have linux user's id and group id.
 
-To run tests, run `pytest` under `/work`. The code uses `localstack` and `mock-server` for S3 integration testing and github API integration testing respectively.
+To run tests, run `docker-compose --profile test up --exit-code-from test`. The code uses `localstack` and `mock-server` for S3 integration testing and github API integration testing respectively.
 
 #### Running Aggregator
 

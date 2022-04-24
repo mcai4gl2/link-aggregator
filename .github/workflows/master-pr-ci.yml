@@ -1,0 +1,22 @@
+name: CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build and test
+      run: docker-compose --profile test up --exit-code-from test
+    - name: Archive coverage report
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage-report
+        path: |
+          */htmlcov/**
+        retention-days: 5

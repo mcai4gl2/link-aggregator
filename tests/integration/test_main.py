@@ -130,7 +130,8 @@ def test_process_files_from_s3_file_happy_path(test_mail_content):
             'path': '/Geng%20Li/2022-04.md'
         },
         'httpResponse': {
-            'statusCode': 204
+            'statusCode': 200,
+            'body': { 'status': 200 }
         }
     })
 

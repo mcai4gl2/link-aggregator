@@ -1,10 +1,22 @@
 version: "3.8"
 services:
-  dev:
-    image: link-latest
-    command: tail -f /dev/null
+  dev: &default
+    build:
+      context: .
+      target: dev
     volumes:
       - ./:/work
+    depends_on:
+      - "localstack"
+      - "mockserver"
+  dev:
+    <<: *default
+    command: tail -f /dev/null
+  test:
+    <<: *default
+    command: bash -c "cd /work && pytest --cov link.aggregator --cov-report html -x tests"
+    profiles:
+      - test
   localstack:
     image: localstack/localstack
     environment:

@@ -35,11 +35,11 @@ RUN conda env create -n apps -f /home/code/environment.yml && \
     conda env remove -n apps && \
     conda clean -a
     
-FROM alpine:latest as dev
+FROM ubuntu:16.04 as dev
 COPY --from=build /venv-dev/ /venv-dev/
 ENV PATH="/venv-dev/bin:${PATH}"
 
-FROM alpine:latest as runtime
+FROM ubuntu:16.04 as runtime
 COPY --from=build /venv/ /venv/
 COPY . /work/
 ENV PATH="/venv/bin:${PATH}"

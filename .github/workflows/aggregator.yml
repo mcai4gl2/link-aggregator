@@ -1,0 +1,23 @@
+name: Run link aggregator
+on:
+  workflow_dispatch:
+    inputs:
+      something:
+        description: 'Not really reaquired but I think there has to be a parameter'
+        required: false
+  schedule:
+    - cron: '*/15 * * * *'
+jobs:
+  build:
+    name: run
+    runs-on: ubuntu-latest
+    steps:
+      - name: aggregator
+        run: docker-compose -f docker/aggregator.yml up --exit-code-from aggregator
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_BUCKET_NAME: links-email
+          FROM_WHITE_LIST: 'Geng Li'
+          GITHUB_AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}

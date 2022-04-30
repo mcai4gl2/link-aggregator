@@ -21,6 +21,7 @@ class Config:
         self.from_white_list = os.getenv('FROM_WHITE_LIST', '').split(',')
         self.github_api_url = os.getenv('GITHUB_API_URL', 'https://api.github.com/repos/mcai4gl2/wiki/contents')
         self.github_auth_token = os.getenv('GITHUB_AUTH_TOKEN', '')
+        self.selenium_url = os.getenv('SELENIM_URL', 'http://selenium:4444/wd/hub')
 
 
 def get_url_title(url: str):
@@ -30,7 +31,22 @@ def get_url_title(url: str):
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, features="html.parser")
     title = soup.find('title').renderContents()
-    return title.decode('utf-8')
+    title = title.decode('utf-8')
+    if not title:
+        options = webdriver.ChromeOptions()
+        options.add_argument('--ignore-ssl-errors=yes')
+        options.add_argument('--ignore-certificate-errors')
+        driver = webdriver.Remote(
+            command_executor=self.selenium_url,
+            options=options
+        )
+        try:
+            driver.get(url)
+            title = driver.title
+        finally:
+            driver.close()
+            driver.quit()
+    return title
 
 
 def find_urls_from_text(text: str):

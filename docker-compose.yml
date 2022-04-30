@@ -9,6 +9,7 @@ services:
     depends_on:
       - "localstack"
       - "mockserver"
+      - "selenium"
   dev:
     <<: *default
     command: tail -f /dev/null
@@ -28,3 +29,8 @@ services:
     image: mockserver/mockserver
     ports:
       - "1080:1080"
+  selenium:
+    image: selenium/standalone-chrome:4.1.4-20220427
+    ports:
+      - "4444:4444"
+    shm_size: '2g'

@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  aggregator:
+    image: mcai4gl2/link-aggregator
+    depends_on:
+      - "selenium"
+  selenium:
+    image: selenium/standalone-chrome:4.1.4-20220427
+    ports:
+      - "4444:4444"
+    shm_size: '2g'

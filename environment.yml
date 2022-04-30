@@ -7,3 +7,4 @@ dependencies:
     - mail-parser=3.15.0
     - requests=2.27
     - beautifulsoup4=4.11.1
+    - selenium=3.141.0

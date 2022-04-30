@@ -4,11 +4,13 @@ import logging
 import base64
 import urllib.parse
 import json
+import time
 
 import boto3
 import requests
 import mailparser
 from bs4 import BeautifulSoup
+from selenium import webdriver
 
 
 class Config:
@@ -31,22 +33,24 @@ def get_url_title(url: str):
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, features="html.parser")
     title = soup.find('title').renderContents()
-    title = title.decode('utf-8')
-    if not title:
-        options = webdriver.ChromeOptions()
-        options.add_argument('--ignore-ssl-errors=yes')
-        options.add_argument('--ignore-certificate-errors')
-        driver = webdriver.Remote(
-            command_executor=self.selenium_url,
-            options=options
-        )
-        try:
-            driver.get(url)
-            title = driver.title
-        finally:
-            driver.close()
-            driver.quit()
-    return title
+    return title.decode('utf-8')
+    
+
+def get_url_title_using_selenim(url, selenium_url):
+    options = webdriver.ChromeOptions()
+    options.add_argument('--ignore-ssl-errors=yes')
+    options.add_argument('--ignore-certificate-errors')
+    driver = webdriver.Remote(
+        command_executor=selenium_url,
+        options=options
+    )
+    try:
+        driver.get(url)
+        time.sleep(2)
+        return driver.title
+    finally:
+        driver.close()
+        driver.quit()
 
 
 def find_urls_from_text(text: str):
@@ -127,6 +131,12 @@ def process_files_from_s3(config: Config):
         for url in urls:
             logging.info(f"Processing url: {url}")
             title = get_url_title(url)
+            if not title:
+                logging.info(f"{url} has no title tag, using selenium to get title")
+                title = get_url_title_using_selenim(url, config.selenium_url)
+            if not title:
+                logging.warning(f"Cannot find title from {url}, skipping")
+                continue
             logging.info(f"url: {url} has title: {title}")
             file_name = f"{mail.from_[0][0]}/{mail.date.strftime('%Y-%m')}.md"
             str_to_add = f"#### {title}\n@ {mail.date.strftime('%Y-%m-%d %H:%M:%S')}\n\n{url}\n\n"

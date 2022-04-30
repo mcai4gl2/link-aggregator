@@ -146,3 +146,52 @@ def test_process_files_from_s3_file_happy_path(test_mail_content):
     assert all(f.startswith('processed/') for f in files)
     response = requests.put("http://mockserver:1080/mockserver/reset")
     assert response.status_code == 200
+
+
+@mock.patch.dict(os.environ, {
+    'AWS_ACCESS_KEY_ID': 'test',
+    'AWS_SECRET_ACCESS_KEY': 'test',
+    'AWS_BUCKET_NAME': 'test-bucket-noemail',
+    'AWS_ENDPOINT_URL': 'http://localstack:4566',
+    'FROM_WHITE_LIST': 'Geng Li',
+    'GITHUB_API_URL': 'http://mockserver:1080'
+}, clear=True)
+def test_process_files_from_s3_fallback_when_title_empty(test_empty_mail):
+    session = boto3.Session(aws_access_key_id="test", aws_secret_access_key="test", region_name="us-east-1")
+    s3 = session.resource('s3', endpoint_url='http://localstack:4566')
+    config = Config()
+    s3.create_bucket(Bucket=config.aws_bucket_name)
+    bucket = s3.Bucket(config.aws_bucket_name)
+    response = s3.Object(config.aws_bucket_name, 'test.txt').put(Body=test_empty_mail)
+
+    requests.put("http://mockserver:1080/mockserver/expectation", json={
+        'httpRequest': {
+            'method': 'GET',
+            'path': '/Geng%20Li/2022-04.md'
+        },
+        'httpResponse': {
+            'statusCode': 404
+        }
+    })
+    requests.put("http://mockserver:1080/mockserver/expectation", json={
+        'httpRequest': {
+            'method': 'PUT',
+            'path': '/Geng%20Li/2022-04.md'
+        },
+        'httpResponse': {
+            'statusCode': 200,
+            'body': { 'status': 200 }
+        }
+    })
+
+    process_files_from_s3(config)
+
+    files = []
+    for file in bucket.objects.all():
+        s3_file = s3.Object(config.aws_bucket_name, file.key)
+        s3_file.delete()
+        files.append(file.key)
+    assert bucket.delete()['ResponseMetadata']['HTTPStatusCode'] == 204
+    assert all(f.startswith('processed/') for f in files)
+    response = requests.put("http://mockserver:1080/mockserver/reset")
+    assert response.status_code == 200

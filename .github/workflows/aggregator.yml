@@ -13,4 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: aggregator
-        run: "docker run --env AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} --env AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} --env AWS_DEFAULT_REGION=us-east-1 --env AWS_BUCKET_NAME=links-email --env FROM_WHITE_LIST='Geng Li' --env GITHUB_AUTH_TOKEN=${{ secrets.AUTH_TOKEN }} mcai4gl2/link-aggregator"
+        run: docker-compose -f docker/aggregator.yml up --exit-code-from aggregator
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_BUCKET_NAME: links-email
+          FROM_WHITE_LIST: 'Geng Li'
+          GITHUB_AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}

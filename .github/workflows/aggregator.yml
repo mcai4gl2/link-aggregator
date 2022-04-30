@@ -12,6 +12,7 @@ jobs:
     name: run
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: aggregator
         run: docker-compose -f docker/aggregator.yml up --exit-code-from aggregator
         env:
